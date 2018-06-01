@@ -32,64 +32,71 @@ def Get_openid(request):
         if request.method == 'GET':
             code = request.GET.get('code')
             _ciphertext = int(request.GET.get('ciphertext'))
-            _time = int(request.GET.get('text'))
+            _time = int(request.GET.get('time'))
             _key = request.GET.get('key')
-            print('1')
+
             if Verify(_ciphertext, _time,_key):
-                print('2')
                 r = requests.get(
                     'https://api.weixin.qq.com/sns/jscode2session?appid=wx86e64720c0387b9f&secret=7965220b0c99aeb7132b293cc6122c4d&js_code=' + code + '&grant_type=authorization_code')
                 code = json.loads(r.text)
-                lis = (100, code)
+                lis = {'data': code, 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
                 json_str = json.dumps(lis)
                 return HttpResponse(json_str)
             else:
-                lis1 = (101, 300)
-                json_str = json.dumps(lis1)
+                lis = {'data': '', 'errorCode': 101, 'flag': 'fail', 'msg': 'Verify is error'}
+                json_str = json.dumps(lis)
                 return HttpResponse(json_str)
         else:
-            lis3 = (103, 300)
-            json_str = json.dumps(lis3)
+            lis = {'data': '', 'errorCode': 103, 'flag': 'fail', 'msg': 'request method error'}
+            json_str = json.dumps(lis)
             return HttpResponse(json_str)
     except:
-        lis4 = (104, 300)
-        json_str = json.dumps(lis4)
+        lis = {'data': '', 'errorCode': 104, 'flag': 'fail', 'msg': 'system is error'}
+        json_str = json.dumps(lis)
         return HttpResponse(json_str)
 
 # 创建用户id_wx
 def Create_user(request):
     print('Create_user')
-    if request.method == 'POST':
-        _wxid = request.POST.get('wxid')
-        _ciphertext = int(request.POST.get('ciphertext'))
-        _time = int(request.POST.get('text'))
-        _key = request.POST.get('key')
-        _photoUrl = request.POST.get('photoUrl')
-        _name = request.POST.get('name')
-        if Verify(_ciphertext, _time,_key):
-            u = User.objects.get(wxId=_wxid)
-            if u:
-                u.name = _name
-                u.photoUrl = _photoUrl
-                u.save()
-                lis = (102, 300)
-                json_str = json.dumps(lis)
-                return HttpResponse(json_str)
+    try:
+        if request.method == 'POST':
+            _wxid = request.POST.get('wxid')
+            print(_wxid)
+            _ciphertext = int(request.POST.get('ciphertext'))
+            _time = int(request.POST.get('time'))
+            _key = request.POST.get('key')
+            _photoUrl = request.POST.get('photoUrl')
+            print(_photoUrl)
+            _name = request.POST.get('name')
+            print(_name)
+            if Verify(_ciphertext, _time,_key):
+                u = User.objects.get(wxId=_wxid)
+                if u:
+                    u.name = _name
+                    u.photoUrl = _photoUrl
+                    u.save()
+                    lis = {'data': '', 'errorCode': 102, 'flag': 'success', 'msg': 'user already exist '}
+                    json_str = json.dumps(lis)
+                    return HttpResponse(json_str)
+                else:
+                    user = User(wxId=_wxid,photoUrl=_photoUrl,name=_name)
+                    user.save()
+                    lis = {'data': '', 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
+                    print(type(lis))
+                    json_str = json.dumps(lis)
+                    return HttpResponse(json_str)
             else:
-                user = User(wxId=_wxid,photoUrl=_photoUrl,name=_name)
-                user.save()
-                lis = (100, 300)
+                lis = {'data': '', 'errorCode': 101, 'flag': 'fail', 'msg': 'Verify is error'}
                 json_str = json.dumps(lis)
                 return HttpResponse(json_str)
         else:
-            lis = (101, 300)
+            lis = {'data': '', 'errorCode': 103, 'flag': 'fail', 'msg': 'request method error'}
             json_str = json.dumps(lis)
             return HttpResponse(json_str)
-    else:
-        lis = (103, 300)
+    except:
+        lis = {'data': '', 'errorCode': 104, 'flag': 'fail', 'msg': 'system is error'}
         json_str = json.dumps(lis)
         return HttpResponse(json_str)
-
 
 
 #发表想法
@@ -100,7 +107,7 @@ def Write(request):
             _wxid = request.POST.get('wxid')
             _content = request.POST.get('content')
             _ciphertext = int(request.POST.get('ciphertext'))
-            _time = int(request.POST.get('text'))
+            _time = int(request.POST.get('time'))
             _key = request.POST.get('key')
             print(_wxid,_content)
             user = User.objects.get(wxId=_wxid)
@@ -138,7 +145,7 @@ def Discuss_one(request):
             _content = request.POST.get('content')
             _thoughtId = request.POST.get('thoughtId')
             _ciphertext = int(request.POST.get('ciphertext'))
-            _time = int(request.POST.get('text'))
+            _time = int(request.POST.get('time'))
             _key = request.POST.get('key')
             if Verify(_ciphertext, _time,_key):
                 user = User.objects.get(wxId = _wxid)
@@ -174,7 +181,7 @@ def Discuss_two(request):
             _content = request.POST.get('content')
             _discussOneId = request.POST.get('thoughtOneId')
             _ciphertext = int(request.POST.get('ciphertext'))
-            _time = int(request.POST.get('text'))
+            _time = int(request.POST.get('time'))
             _key = request.POST.get('key')
             if Verify(_ciphertext, _time,_key):
                 user = User.objects.get(wxId = _wxid)
@@ -209,7 +216,7 @@ def Support_thought(request):
             _wxid = request.POST.get('wxid')
             _thoughtId = request.POST.get('thoughtId')
             _ciphertext = int(request.POST.get('ciphertext'))
-            _time = int(request.POST.get('text'))
+            _time = int(request.POST.get('time'))
             _key = request.POST.get('key')
             print('1',_thoughtId)
             if Verify(_ciphertext, _time,_key):
@@ -259,7 +266,7 @@ def Support_disone(request):
             _wxid = request.POST.get('wxid')
             _disoneId = request.POST.get('disoneId')
             _ciphertext = int(request.POST.get('ciphertext'))
-            _time = int(request.POST.get('text'))
+            _time = int(request.POST.get('time'))
             _key = request.POST.get('key')
             if Verify(_ciphertext, _time,_key):
                 user = User.objects.get(wxId = _wxid)
@@ -297,13 +304,10 @@ def Get_thought(request):
         if request.method == 'GET':
             _page = request.GET.get('page')
             _ciphertext = int(request.GET.get('ciphertext'))
-            _time = int(request.GET.get('text'))
+            _time = int(request.GET.get('time'))
             _key = request.GET.get('key')
-            print('1',_page)
             if Verify(_ciphertext, _time,_key):
                 thought = Thought.objects.all().order_by('weight')
-
-                print('2', thought)
                 paginator = Paginator(thought, 4)
                 try:
                     contacts = paginator.page(_page)
@@ -317,22 +321,21 @@ def Get_thought(request):
                     lis = (110, 300)
                     json_str = json.dumps(lis)
                     return HttpResponse(json_str)
-
                 data = serializers.serialize('json', contacts.object_list)
-                lis = (100, data)
+                lis = {'data':data,'errorCode':100,'flag':'success','msg':'ok'}
                 json_str = json.dumps(lis)
                 return HttpResponse(json_str)
             else:
-                lis1 = (101, 300)
-                json_str = json.dumps(lis1)
+                lis = {'data': '', 'errorCode': 101, 'flag': 'fail', 'msg': 'Verify is error'}
+                json_str = json.dumps(lis)
                 return HttpResponse(json_str)
         else:
-            lis3 = (103, 300)
-            json_str = json.dumps(lis3)
+            lis = {'data': '', 'errorCode': 103, 'flag': 'fail', 'msg': 'request method error'}
+            json_str = json.dumps(lis)
             return HttpResponse(json_str)
     except:
-        lis4 = (104, 300)
-        json_str = json.dumps(lis4)
+        lis = {'data': '', 'errorCode': 104, 'flag': 'fail', 'msg': 'system is error'}
+        json_str = json.dumps(lis)
         return HttpResponse(json_str)
 
 #获取一级评论
@@ -342,7 +345,7 @@ def Get_discussone(request):
             _page = request.GET.get('page')
             _thoughtId = request.GET.get('thoughtId')
             _ciphertext = int(request.GET.get('ciphertext'))
-            _time = int(request.GET.get('text'))
+            _time = int(request.GET.get('time'))
             _key = request.GET.get('key')
             if Verify(_ciphertext, _time,_key):
                 disone = DiscussOne.objects.filter(thoughtId = _thoughtId)
@@ -379,7 +382,7 @@ def Get_discusstwo(request):
             _page = request.GET.get('page')
             _discussoneId = request.GET.get('discussoneId')
             _ciphertext = int(request.GET.get('ciphertext'))
-            _time = int(request.GET.get('text'))
+            _time = int(request.GET.get('time'))
             _key = request.GET.get('key')
             if Verify(_ciphertext, _time,_key):
                 distwo = DiscussTwo.objects.filter(discussoneId = _discussoneId)
@@ -417,7 +420,7 @@ def Get_mythought(request):
             _wxid = request.GET.get('wxid')
             _page = request.GET.get('page')
             _ciphertext = int(request.GET.get('ciphertext'))
-            _time = int(request.GET.get('text'))
+            _time = int(request.GET.get('time'))
             _key = request.GET.get('key')
             if Verify(_ciphertext, _time,_key):
                 user = User.objects.get(wxId = _wxid)
@@ -455,7 +458,7 @@ def Get_mydis(request):
             _wxid = request.GET.get('wxid')
             _page = request.GET.get('page')
             _ciphertext = int(request.GET.get('ciphertext'))
-            _time = int(request.GET.get('text'))
+            _time = int(request.GET.get('time'))
             _key = request.GET.get('key')
             if Verify(_ciphertext, _time,_key):
                 user = User.objects.get(wxId = _wxid)
