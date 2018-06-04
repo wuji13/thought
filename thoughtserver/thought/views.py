@@ -114,27 +114,28 @@ def Write(request):
             if Verify(_ciphertext, _time,_key):
                 if Thought.objects.filter(content=_content).filter(userId=user):
                     print(Thought.objects.filter(content=_content).filter(userId=user))
-                    lis = (102, 300)
+                    lis = {'data': '', 'errorCode': 102, 'flag': 'success', 'msg': 'thought already exist '}
                     json_str = json.dumps(lis)
+
                     return HttpResponse(json_str)
                 else:
                     _duration = round(time.time())
                     thought = Thought(userId = user,content=_content,duration=_duration,auther=user.name)
                     thought.save()
-                    lis = (100, 300)
+                    lis = {'data': '', 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
                     json_str = json.dumps(lis)
                     return HttpResponse(json_str)
             else:
-                lis1 = (101, 300)
-                json_str = json.dumps(lis1)
+                lis = {'data': '', 'errorCode': 101, 'flag': 'fail', 'msg': 'Verify is error'}
+                json_str = json.dumps(lis)
                 return HttpResponse(json_str)
         else:
-            lis3 = (103, 300)
-            json_str = json.dumps(lis3)
+            lis = {'data': '', 'errorCode': 103, 'flag': 'fail', 'msg': 'request method error'}
+            json_str = json.dumps(lis)
             return HttpResponse(json_str)
     except:
-        lis4 = (104, 300)
-        json_str = json.dumps(lis4)
+        lis = {'data': '', 'errorCode': 104, 'flag': 'fail', 'msg': 'system is error'}
+        json_str = json.dumps(lis)
         return HttpResponse(json_str)
 
 #一级评论想法
@@ -155,20 +156,20 @@ def Discuss_one(request):
 
                 thought.discussNum = thought.discussNum + 1
                 thought.save()
-                lis = (100, 300)
+                lis = {'data': '', 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
                 json_str = json.dumps(lis)
                 return HttpResponse(json_str)
             else:
-                lis1 = (101, 300)
-                json_str = json.dumps(lis1)
+                lis = {'data': '', 'errorCode': 101, 'flag': 'fail', 'msg': 'Verify is error'}
+                json_str = json.dumps(lis)
                 return HttpResponse(json_str)
         else:
-            lis3 = (103, 300)
-            json_str = json.dumps(lis3)
+            lis = {'data': '', 'errorCode': 103, 'flag': 'fail', 'msg': 'request method error'}
+            json_str = json.dumps(lis)
             return HttpResponse(json_str)
     except:
-        lis4 = (104, 300)
-        json_str = json.dumps(lis4)
+        lis = {'data': '', 'errorCode': 104, 'flag': 'fail', 'msg': 'system is error'}
+        json_str = json.dumps(lis)
         return HttpResponse(json_str)
 
 
@@ -190,20 +191,20 @@ def Discuss_two(request):
                 dis_two.save()
                 discussOne.discussNum = discussOne.discussNum + 1
                 discussOne.save()
-                lis = (100, 300)
+                lis = {'data': '', 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
                 json_str = json.dumps(lis)
                 return HttpResponse(json_str)
             else:
-                lis1 = (101, 300)
-                json_str = json.dumps(lis1)
+                lis = {'data': '', 'errorCode': 101, 'flag': 'fail', 'msg': 'Verify is error'}
+                json_str = json.dumps(lis)
                 return HttpResponse(json_str)
         else:
-            lis3 = (103, 300)
-            json_str = json.dumps(lis3)
+            lis = {'data': '', 'errorCode': 103, 'flag': 'fail', 'msg': 'request method error'}
+            json_str = json.dumps(lis)
             return HttpResponse(json_str)
     except:
-        lis4 = (104, 300)
-        json_str = json.dumps(lis4)
+        lis = {'data': '', 'errorCode': 104, 'flag': 'fail', 'msg': 'system is error'}
+        json_str = json.dumps(lis)
         return HttpResponse(json_str)
 
 
@@ -232,7 +233,7 @@ def Support_thought(request):
                     supp.delete()
                     thought.supportNum=thought.supportNum - 1
                     thought.save()
-                    lis = (1000, 300)
+                    lis = {'data': '', 'errorCode': 1000, 'flag': 'success', 'msg': 'has support'}
                     json_str = json.dumps(lis)
                     return HttpResponse(json_str)
                 else:
@@ -241,21 +242,21 @@ def Support_thought(request):
                     suppThought.save()
                     thought.supportNum = thought.supportNum + 1
                     thought.save()
-                    lis = (1001, 300)
+                    lis = {'data': '', 'errorCode': 1001, 'flag': 'success', 'msg': 'cancel support'}
                     json_str = json.dumps(lis)
                     return HttpResponse(json_str)
 
             else:
-                lis1 = (101, 300)
-                json_str = json.dumps(lis1)
+                lis = {'data': '', 'errorCode': 101, 'flag': 'fail', 'msg': 'Verify is error'}
+                json_str = json.dumps(lis)
                 return HttpResponse(json_str)
         else:
-            lis3 = (103, 300)
-            json_str = json.dumps(lis3)
+            lis = {'data': '', 'errorCode': 103, 'flag': 'fail', 'msg': 'request method error'}
+            json_str = json.dumps(lis)
             return HttpResponse(json_str)
     except:
-        lis4 = (104, 300)
-        json_str = json.dumps(lis4)
+        lis = {'data': '', 'errorCode': 104, 'flag': 'fail', 'msg': 'system is error'}
+        json_str = json.dumps(lis)
         return HttpResponse(json_str)
 
 
@@ -276,25 +277,28 @@ def Support_disone(request):
                     suppdis.delete()
                     _disone.supportNum=_disone.supportNum - 1
                     _disone.save()
+                    lis = {'data': '', 'errorCode': 1000, 'flag': 'success', 'msg': 'has support'}
+                    json_str = json.dumps(lis)
+                    return HttpResponse(json_str)
                 else:
                     suppDisone = SupportDisone(userId=user,discussoneId=_disone)
                     suppDisone.save()
                     _disone.supportNum = _disone.supportNum + 1
                     _disone.save()
-                lis = (100, 300)
+                    lis = {'data': '', 'errorCode': 1001, 'flag': 'success', 'msg': 'cancel support'}
+                    json_str = json.dumps(lis)
+                    return HttpResponse(json_str)
+            else:
+                lis = {'data': '', 'errorCode': 101, 'flag': 'fail', 'msg': 'Verify is error'}
                 json_str = json.dumps(lis)
                 return HttpResponse(json_str)
-            else:
-                lis1 = (101, 300)
-                json_str = json.dumps(lis1)
-                return HttpResponse(json_str)
         else:
-            lis3 = (103, 300)
-            json_str = json.dumps(lis3)
+            lis = {'data': '', 'errorCode': 103, 'flag': 'fail', 'msg': 'request method error'}
+            json_str = json.dumps(lis)
             return HttpResponse(json_str)
     except:
-        lis4 = (104, 300)
-        json_str = json.dumps(lis4)
+        lis = {'data': '', 'errorCode': 104, 'flag': 'fail', 'msg': 'system is error'}
+        json_str = json.dumps(lis)
         return HttpResponse(json_str)
 
 #获取思想
@@ -313,12 +317,12 @@ def Get_thought(request):
                     contacts = paginator.page(_page)
                 except PageNotAnInteger:
                     # If page is not an integer, deliver first page.
-                    lis = (110, 300)
+                    lis = {'data': '', 'errorCode': 200, 'flag': 'success', 'msg': 'the first page'}
                     json_str = json.dumps(lis)
                     return HttpResponse(json_str)
                 except EmptyPage:
                     # If page is out of range (e.g. 9999), deliver last page of results.
-                    lis = (110, 300)
+                    lis = {'data': '', 'errorCode': 201, 'flag': 'success', 'msg': 'the last page'}
                     json_str = json.dumps(lis)
                     return HttpResponse(json_str)
                 data = serializers.serialize('json', contacts.object_list)
@@ -354,25 +358,29 @@ def Get_discussone(request):
                     contacts = paginator.page(_page)
                 except PageNotAnInteger:
                     # If page is not an integer, deliver first page.
-                    contacts = paginator.page(1)
+                    lis = {'data': '', 'errorCode': 200, 'flag': 'success', 'msg': 'the first page'}
+                    json_str = json.dumps(lis)
+                    return HttpResponse(json_str)
                 except EmptyPage:
                     # If page is out of range (e.g. 9999), deliver last page of results.
-                    contacts = paginator.page(paginator.num_pages)
-                data = {'contacts':contacts}
-                lis = (100, data)
+                    lis = {'data': '', 'errorCode': 201, 'flag': 'success', 'msg': 'the last page'}
+                    json_str = json.dumps(lis)
+                    return HttpResponse(json_str)
+                data = serializers.serialize('json', contacts.object_list)
+                lis = {'data': data, 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
                 json_str = json.dumps(lis)
                 return HttpResponse(json_str)
             else:
-                lis1 = (101, 300)
-                json_str = json.dumps(lis1)
+                lis = {'data': '', 'errorCode': 101, 'flag': 'fail', 'msg': 'Verify is error'}
+                json_str = json.dumps(lis)
                 return HttpResponse(json_str)
         else:
-            lis3 = (103, 300)
-            json_str = json.dumps(lis3)
+            lis = {'data': '', 'errorCode': 103, 'flag': 'fail', 'msg': 'request method error'}
+            json_str = json.dumps(lis)
             return HttpResponse(json_str)
     except:
-        lis4 = (104, 300)
-        json_str = json.dumps(lis4)
+        lis = {'data': '', 'errorCode': 104, 'flag': 'fail', 'msg': 'system is error'}
+        json_str = json.dumps(lis)
         return HttpResponse(json_str)
 
 #获取二级评论
@@ -391,25 +399,29 @@ def Get_discusstwo(request):
                     contacts = paginator.page(_page)
                 except PageNotAnInteger:
                     # If page is not an integer, deliver first page.
-                    contacts = paginator.page(1)
+                    lis = {'data': '', 'errorCode': 200, 'flag': 'success', 'msg': 'the first page'}
+                    json_str = json.dumps(lis)
+                    return HttpResponse(json_str)
                 except EmptyPage:
                     # If page is out of range (e.g. 9999), deliver last page of results.
-                    contacts = paginator.page(paginator.num_pages)
-                data = {'contacts':contacts}
-                lis = (100, data)
+                    lis = {'data': '', 'errorCode': 201, 'flag': 'success', 'msg': 'the last page'}
+                    json_str = json.dumps(lis)
+                    return HttpResponse(json_str)
+                data = serializers.serialize('json', contacts.object_list)
+                lis = {'data': data, 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
                 json_str = json.dumps(lis)
                 return HttpResponse(json_str)
             else:
-                lis1 = (101, 300)
-                json_str = json.dumps(lis1)
+                lis = {'data': '', 'errorCode': 101, 'flag': 'fail', 'msg': 'Verify is error'}
+                json_str = json.dumps(lis)
                 return HttpResponse(json_str)
         else:
-            lis3 = (103, 300)
-            json_str = json.dumps(lis3)
+            lis = {'data': '', 'errorCode': 103, 'flag': 'fail', 'msg': 'request method error'}
+            json_str = json.dumps(lis)
             return HttpResponse(json_str)
     except:
-        lis4 = (104, 300)
-        json_str = json.dumps(lis4)
+        lis = {'data': '', 'errorCode': 104, 'flag': 'fail', 'msg': 'system is error'}
+        json_str = json.dumps(lis)
         return HttpResponse(json_str)
 
 
@@ -430,25 +442,29 @@ def Get_mythought(request):
                     contacts = paginator.page(_page)
                 except PageNotAnInteger:
                     # If page is not an integer, deliver first page.
-                    contacts = paginator.page(1)
+                    lis = {'data': '', 'errorCode': 200, 'flag': 'success', 'msg': 'the first page'}
+                    json_str = json.dumps(lis)
+                    return HttpResponse(json_str)
                 except EmptyPage:
                     # If page is out of range (e.g. 9999), deliver last page of results.
-                    contacts = paginator.page(paginator.num_pages)
+                    lis = {'data': '', 'errorCode': 201, 'flag': 'success', 'msg': 'the last page'}
+                    json_str = json.dumps(lis)
+                    return HttpResponse(json_str)
                 data = {'contacts':contacts}
-                lis = (100, data)
+                lis = {'data': data, 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
                 json_str = json.dumps(lis)
                 return HttpResponse(json_str)
             else:
-                lis1 = (101, 300)
-                json_str = json.dumps(lis1)
+                lis = {'data': '', 'errorCode': 101, 'flag': 'fail', 'msg': 'Verify is error'}
+                json_str = json.dumps(lis)
                 return HttpResponse(json_str)
         else:
-            lis3 = (103, 300)
-            json_str = json.dumps(lis3)
+            lis = {'data': '', 'errorCode': 103, 'flag': 'fail', 'msg': 'request method error'}
+            json_str = json.dumps(lis)
             return HttpResponse(json_str)
     except:
-        lis4 = (104, 300)
-        json_str = json.dumps(lis4)
+        lis = {'data': '', 'errorCode': 104, 'flag': 'fail', 'msg': 'system is error'}
+        json_str = json.dumps(lis)
         return HttpResponse(json_str)
 
 #获取我的评论
@@ -468,23 +484,27 @@ def Get_mydis(request):
                     contacts = paginator.page(_page)
                 except PageNotAnInteger:
                     # If page is not an integer, deliver first page.
-                    contacts = paginator.page(1)
+                    lis = {'data': '', 'errorCode': 200, 'flag': 'success', 'msg': 'the first page'}
+                    json_str = json.dumps(lis)
+                    return HttpResponse(json_str)
                 except EmptyPage:
                     # If page is out of range (e.g. 9999), deliver last page of results.
-                    contacts = paginator.page(paginator.num_pages)
+                    lis = {'data': '', 'errorCode': 201, 'flag': 'success', 'msg': 'the last page'}
+                    json_str = json.dumps(lis)
+                    return HttpResponse(json_str)
                 data = {'contacts':contacts}
-                lis = (100, data)
+                lis = {'data': data, 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
                 json_str = json.dumps(lis)
                 return HttpResponse(json_str)
             else:
-                lis1 = (101, 300)
-                json_str = json.dumps(lis1)
+                lis = {'data': '', 'errorCode': 101, 'flag': 'fail', 'msg': 'Verify is error'}
+                json_str = json.dumps(lis)
                 return HttpResponse(json_str)
         else:
-            lis3 = (103, 300)
-            json_str = json.dumps(lis3)
+            lis = {'data': '', 'errorCode': 103, 'flag': 'fail', 'msg': 'request method error'}
+            json_str = json.dumps(lis)
             return HttpResponse(json_str)
     except:
-        lis4 = (104, 300)
-        json_str = json.dumps(lis4)
+        lis = {'data': '', 'errorCode': 104, 'flag': 'fail', 'msg': 'system is error'}
+        json_str = json.dumps(lis)
         return HttpResponse(json_str)
