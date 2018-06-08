@@ -30,7 +30,7 @@ class DiscussOne(models.Model):
     userId = models.ForeignKey(User)
     auther = models.CharField(max_length=64, blank=True, null=True)
     content = models.CharField(max_length=1024)
-    createTime = models.DateTimeField()
+    createTime = models.DateTimeField(auto_now_add=True)
     discussNum = models.IntegerField(default=0)
     supportNum = models.IntegerField(default=0)
 

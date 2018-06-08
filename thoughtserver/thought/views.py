@@ -4,9 +4,10 @@ import json
 import datetime,time
 from datetime import timedelta
 from django.http import HttpResponse
-from .models import Developer,User,Thought,DiscussOne,DiscussTwo,SupportThought,SupportDisone
+from .models import Developer,User,Thought,DiscussTwo,SupportThought,SupportDisone,DiscussOne
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core import serializers
+from itertools import chain
 # Create your views here.
 
 
@@ -140,6 +141,7 @@ def Write(request):
 
 #一级评论想法
 def Discuss_one(request):
+    print('Discuss_one')
     try:
         if request.method == 'POST':
             _wxid = request.POST.get('wxid')
@@ -149,14 +151,17 @@ def Discuss_one(request):
             _time = int(request.POST.get('time'))
             _key = request.POST.get('key')
             if Verify(_ciphertext, _time,_key):
+                print(_content,_thoughtId)
                 user = User.objects.get(wxId = _wxid)
                 thought = Thought.objects.get(pk=_thoughtId)
+                print(user.name, thought)
                 dis_one = DiscussOne(thoughtId=thought,userId=user,content=_content,auther=user.name)
+                print(' _thoughtId')
                 dis_one.save()
-
                 thought.discussNum = thought.discussNum + 1
                 thought.save()
                 lis = {'data': '', 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
+                print(lis)
                 json_str = json.dumps(lis)
                 return HttpResponse(json_str)
             else:
@@ -176,18 +181,21 @@ def Discuss_one(request):
 
 #二级评论想法
 def Discuss_two(request):
+    print("Discuss_two")
     try:
         if request.method == 'POST':
             _wxid = request.POST.get('wxid')
             _content = request.POST.get('content')
-            _discussOneId = request.POST.get('thoughtOneId')
+            _discussOneId = request.POST.get('disOneId')
             _ciphertext = int(request.POST.get('ciphertext'))
             _time = int(request.POST.get('time'))
             _key = request.POST.get('key')
             if Verify(_ciphertext, _time,_key):
                 user = User.objects.get(wxId = _wxid)
                 discussOne = DiscussOne.objects.get(pk=_discussOneId)
-                dis_two = DiscussOne(discussoneId=discussOne,userId=user,content=_content,auther=user.name)
+
+                dis_two = DiscussTwo(discussoneId=discussOne,userId=user,content=_content,auther=user.name)
+
                 dis_two.save()
                 discussOne.discussNum = discussOne.discussNum + 1
                 discussOne.save()
@@ -262,6 +270,7 @@ def Support_thought(request):
 
 #二级点赞/取消点赞
 def Support_disone(request):
+    print("Support_disone")
     try:
         if request.method == 'POST':
             _wxid = request.POST.get('wxid')
@@ -278,28 +287,24 @@ def Support_disone(request):
                     _disone.supportNum=_disone.supportNum - 1
                     _disone.save()
                     lis = {'data': '', 'errorCode': 1000, 'flag': 'success', 'msg': 'has support'}
-                    json_str = json.dumps(lis)
-                    return HttpResponse(json_str)
                 else:
                     suppDisone = SupportDisone(userId=user,discussoneId=_disone)
                     suppDisone.save()
                     _disone.supportNum = _disone.supportNum + 1
                     _disone.save()
                     lis = {'data': '', 'errorCode': 1001, 'flag': 'success', 'msg': 'cancel support'}
-                    json_str = json.dumps(lis)
-                    return HttpResponse(json_str)
+
             else:
                 lis = {'data': '', 'errorCode': 101, 'flag': 'fail', 'msg': 'Verify is error'}
-                json_str = json.dumps(lis)
-                return HttpResponse(json_str)
+
         else:
             lis = {'data': '', 'errorCode': 103, 'flag': 'fail', 'msg': 'request method error'}
-            json_str = json.dumps(lis)
-            return HttpResponse(json_str)
+
     except:
         lis = {'data': '', 'errorCode': 104, 'flag': 'fail', 'msg': 'system is error'}
-        json_str = json.dumps(lis)
-        return HttpResponse(json_str)
+    print(lis)
+    json_str = json.dumps(lis)
+    return HttpResponse(json_str)
 
 #获取思想
 def Get_thought(request):
@@ -344,16 +349,20 @@ def Get_thought(request):
 
 #获取一级评论
 def Get_discussone(request):
+    print('Get_discussone')
     try:
         if request.method == 'GET':
+            _wxid = request.GET.get('wxid')
             _page = request.GET.get('page')
             _thoughtId = request.GET.get('thoughtId')
             _ciphertext = int(request.GET.get('ciphertext'))
             _time = int(request.GET.get('time'))
             _key = request.GET.get('key')
             if Verify(_ciphertext, _time,_key):
-                disone = DiscussOne.objects.filter(thoughtId = _thoughtId)
+                user = User.objects.get(wxId=_wxid)
+                disone = DiscussOne.objects.filter(thoughtId = _thoughtId).order_by('createTime')
                 paginator = Paginator(disone, 20)
+                print(disone)
                 try:
                     contacts = paginator.page(_page)
                 except PageNotAnInteger:
@@ -367,7 +376,10 @@ def Get_discussone(request):
                     json_str = json.dumps(lis)
                     return HttpResponse(json_str)
                 data = serializers.serialize('json', contacts.object_list)
-                lis = {'data': data, 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
+                sup = Get_disonesup(user,contacts.object_list)
+                datas={'data':data,'sup':sup}
+                lis = {'data': datas, 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
+                print(lis)
                 json_str = json.dumps(lis)
                 return HttpResponse(json_str)
             else:
@@ -383,17 +395,34 @@ def Get_discussone(request):
         json_str = json.dumps(lis)
         return HttpResponse(json_str)
 
+
+#获取一级评论是否点赞
+def Get_disonesup(user,disone):
+    sup=[]
+    for i in disone:
+        c = SupportDisone.objects.filter(discussoneId=i).filter(userId=user)
+        if c :
+            sup.append(True)
+        else:
+            sup.append(False)
+    return sup
+
+
+
 #获取二级评论
 def Get_discusstwo(request):
+    print('Get_discusstwo')
     try:
         if request.method == 'GET':
             _page = request.GET.get('page')
-            _discussoneId = request.GET.get('discussoneId')
+            _discussoneId = request.GET.get('disOneId')
             _ciphertext = int(request.GET.get('ciphertext'))
             _time = int(request.GET.get('time'))
             _key = request.GET.get('key')
+            print(_page)
             if Verify(_ciphertext, _time,_key):
-                distwo = DiscussTwo.objects.filter(discussoneId = _discussoneId)
+                distwo = DiscussTwo.objects.filter(discussoneId = _discussoneId).order_by('createTime')
+                print(distwo)
                 paginator = Paginator(distwo, 20)
                 try:
                     contacts = paginator.page(_page)
@@ -409,6 +438,7 @@ def Get_discusstwo(request):
                     return HttpResponse(json_str)
                 data = serializers.serialize('json', contacts.object_list)
                 lis = {'data': data, 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
+                print(lis)
                 json_str = json.dumps(lis)
                 return HttpResponse(json_str)
             else:
@@ -427,6 +457,7 @@ def Get_discusstwo(request):
 
 #获取我的发表
 def Get_mythought(request):
+    print('Get_mythought')
     try:
         if request.method == 'GET':
             _wxid = request.GET.get('wxid')
@@ -434,9 +465,11 @@ def Get_mythought(request):
             _ciphertext = int(request.GET.get('ciphertext'))
             _time = int(request.GET.get('time'))
             _key = request.GET.get('key')
+            print(_wxid,_page)
             if Verify(_ciphertext, _time,_key):
                 user = User.objects.get(wxId = _wxid)
-                thought = Thought.objects.filter(userId=user)
+                thought = Thought.objects.filter(userId=user).order_by('createTime')
+                print('hzegegfjk', thought)
                 paginator = Paginator(thought, 20)
                 try:
                     contacts = paginator.page(_page)
@@ -450,8 +483,9 @@ def Get_mythought(request):
                     lis = {'data': '', 'errorCode': 201, 'flag': 'success', 'msg': 'the last page'}
                     json_str = json.dumps(lis)
                     return HttpResponse(json_str)
-                data = {'contacts':contacts}
+                data = serializers.serialize('json', contacts.object_list)
                 lis = {'data': data, 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
+                print('hzegegfjklasjdfakl',lis)
                 json_str = json.dumps(lis)
                 return HttpResponse(json_str)
             else:
@@ -469,6 +503,7 @@ def Get_mythought(request):
 
 #获取我的评论
 def Get_mydis(request):
+    print("Get_mydis")
     try:
         if request.method == 'GET':
             _wxid = request.GET.get('wxid')
@@ -476,10 +511,12 @@ def Get_mydis(request):
             _ciphertext = int(request.GET.get('ciphertext'))
             _time = int(request.GET.get('time'))
             _key = request.GET.get('key')
+            print(_wxid,_page)
             if Verify(_ciphertext, _time,_key):
                 user = User.objects.get(wxId = _wxid)
-                discussone = DiscussOne.objects.filter(userId=user)
+                discussone = DiscussOne.objects.filter(userId=user).order_by('createTime')
                 paginator = Paginator(discussone, 20)
+                print(paginator)
                 try:
                     contacts = paginator.page(_page)
                 except PageNotAnInteger:
@@ -492,7 +529,98 @@ def Get_mydis(request):
                     lis = {'data': '', 'errorCode': 201, 'flag': 'success', 'msg': 'the last page'}
                     json_str = json.dumps(lis)
                     return HttpResponse(json_str)
-                data = {'contacts':contacts}
+                data = serializers.serialize('json', contacts.object_list)
+                theme = []
+                for i in contacts.object_list:
+                    theme.append(i.thoughtId.content)
+                datas={'dis':data,'theme':theme}
+                lis = {'data': datas, 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
+            else:
+                lis = {'data': '', 'errorCode': 101, 'flag': 'fail', 'msg': 'Verify is error'}
+        else:
+            lis = {'data': '', 'errorCode': 103, 'flag': 'fail', 'msg': 'request method error'}
+
+    except:
+        lis = {'data': '', 'errorCode': 104, 'flag': 'fail', 'msg': 'system is error'}
+    print(lis)
+    json_str = json.dumps(lis)
+    return HttpResponse(json_str)
+
+#获取我回复的看法
+def Get_myReply(request):
+    print("Get_myReply")
+    try:
+        if request.method == 'GET':
+            _wxid = request.GET.get('wxid')
+            _page = request.GET.get('page')
+            _ciphertext = int(request.GET.get('ciphertext'))
+            _time = int(request.GET.get('time'))
+            _key = request.GET.get('key')
+            print(_wxid,_page)
+            if Verify(_ciphertext, _time,_key):
+                user = User.objects.get(wxId = _wxid)
+                discusstwo = DiscussTwo.objects.filter(userId=user).order_by('createTime')
+                paginator = Paginator(discusstwo, 20)
+                print(paginator)
+                try:
+                    contacts = paginator.page(_page)
+
+                except PageNotAnInteger:
+                    # If page is not an integer, deliver first page.
+
+                    lis = {'data': '', 'errorCode': 200, 'flag': 'success', 'msg': 'the first page'}
+                    print(lis)
+                    json_str = json.dumps(lis)
+                    return HttpResponse(json_str)
+                except EmptyPage:
+                    # If page is out of range (e.g. 9999), deliver last page of results.
+                    lis = {'data': '', 'errorCode': 201, 'flag': 'success', 'msg': 'the last page'}
+                    json_str = json.dumps(lis)
+                    return HttpResponse(json_str)
+                data = serializers.serialize('json', contacts.object_list)
+                theme = []
+                thought = []
+                for i in contacts.object_list:
+                    theme.append(i.discussoneId.content)
+                    thought.append(i.discussoneId.thoughtId.content)
+                datas={'dis':data,'theme':theme,'thought':thought}
+                lis = {'data': datas, 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
+                print(lis)
+            else:
+                lis = {'data': '', 'errorCode': 101, 'flag': 'fail', 'msg': 'Verify is error'}
+        else:
+            lis = {'data': '', 'errorCode': 103, 'flag': 'fail', 'msg': 'request method error'}
+
+    except:
+        lis = {'data': '', 'errorCode': 104, 'flag': 'fail', 'msg': 'system is error'}
+    print(lis)
+    json_str = json.dumps(lis)
+    return HttpResponse(json_str)
+
+#获取头像，内容和作者信息
+def Get_user_img(request):
+    print('Get_user_img')
+    try:
+        if request.method == 'GET':
+            _id = request.GET.get('id')
+            _type = request.GET.get('ty')
+            _ciphertext = int(request.GET.get('ciphertext'))
+            _time = int(request.GET.get('time'))
+            _key = request.GET.get('key')
+            print(_id)
+            if Verify(_ciphertext, _time, _key):
+
+                if _type=='thought':
+                    thought = Thought.objects.get(pk=_id)
+                    photoUrl = thought.userId.photoUrl
+                    content = thought.content
+                    auther = thought.auther
+                elif _type=='discussone':
+                    discussone = DiscussOne.objects.get(pk=_id)
+                    photoUrl = discussone.userId.photoUrl
+                    content = discussone.content
+                    auther = discussone.auther
+                data={'photoUrl':photoUrl,'content':content,'auther':auther}
                 lis = {'data': data, 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
                 json_str = json.dumps(lis)
                 return HttpResponse(json_str)
@@ -508,3 +636,43 @@ def Get_mydis(request):
         lis = {'data': '', 'errorCode': 104, 'flag': 'fail', 'msg': 'system is error'}
         json_str = json.dumps(lis)
         return HttpResponse(json_str)
+
+#获取是否点赞
+def Or_support(request):
+    print('Or_support')
+    try:
+        if request.method == 'GET':
+            _wxid = request.GET.get('wxid')
+            _selectId = request.GET.get('selectId')
+            _type = request.GET.get('ty')
+            _ciphertext = int(request.GET.get('ciphertext'))
+            _time = int(request.GET.get('time'))
+            _key = request.GET.get('key')
+            print(_wxid,_selectId,_type)
+            if Verify(_ciphertext, _time, _key):
+                user = User.objects.get(wxId = _wxid)
+                if _type=='thought':
+                    thought = Thought.objects.get(pk=_selectId)
+                    print(user, thought)
+                    selected = SupportThought.objects.filter(userId=user).filter(thoughtId=thought)
+                elif _type=='discussone':
+                    discussone = DiscussOne.objects.get(pk=_selectId)
+                    selected = SupportDisone.objects.filter(userId=user).filter(discussoneId=discussone)
+
+                if selected:
+
+                    lis = {'data': True, 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
+
+                else:
+                    lis = {'data': False, 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
+
+            else:
+                lis = {'data': '', 'errorCode': 101, 'flag': 'fail', 'msg': 'Verify is error'}
+
+        else:
+            lis = {'data': '', 'errorCode': 103, 'flag': 'fail', 'msg': 'request method error'}
+
+    except:
+        lis = {'data': '', 'errorCode': 104, 'flag': 'fail', 'msg': 'system is error'}
+    json_str = json.dumps(lis)
+    return HttpResponse(json_str)
