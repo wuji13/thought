@@ -331,7 +331,7 @@ def Get_thought(request):
                     json_str = json.dumps(lis)
                     return HttpResponse(json_str)
                 data = serializers.serialize('json', contacts.object_list)
-                lis = {'data':data,'errorCode':100,'flag':'success','msg':'ok'}
+                lis = {'data':json.loads(data),'errorCode':100,'flag':'success','msg':'ok'}
                 json_str = json.dumps(lis)
                 return HttpResponse(json_str)
             else:
