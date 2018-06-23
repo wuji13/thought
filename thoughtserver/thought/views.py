@@ -607,7 +607,7 @@ def Get_user_img(request):
             _ciphertext = int(request.GET.get('ciphertext'))
             _time = int(request.GET.get('time'))
             _key = request.GET.get('key')
-            print(_id)
+
             if Verify(_ciphertext, _time, _key):
 
                 if _type=='thought':
@@ -615,25 +615,31 @@ def Get_user_img(request):
                     photoUrl = thought.userId.photoUrl
                     content = thought.content
                     auther = thought.auther
+                    data = {'photoUrl': photoUrl, 'content': content, 'auther': auther}
                 elif _type=='discussone':
                     discussone = DiscussOne.objects.get(pk=_id)
                     photoUrl = discussone.userId.photoUrl
                     content = discussone.content
                     auther = discussone.auther
-                data={'photoUrl':photoUrl,'content':content,'auther':auther}
+                    da = discussone.createTime
+                    date = str(da)
+                    data={'photoUrl':photoUrl,'content':content,'auther':auther,'date':date}
                 lis = {'data': data, 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
                 json_str = json.dumps(lis)
                 return HttpResponse(json_str)
             else:
                 lis = {'data': '', 'errorCode': 101, 'flag': 'fail', 'msg': 'Verify is error'}
+                print('0202',lis)
                 json_str = json.dumps(lis)
                 return HttpResponse(json_str)
         else:
             lis = {'data': '', 'errorCode': 103, 'flag': 'fail', 'msg': 'request method error'}
+            print('0303',lis)
             json_str = json.dumps(lis)
             return HttpResponse(json_str)
     except:
         lis = {'data': '', 'errorCode': 104, 'flag': 'fail', 'msg': 'system is error'}
+        print('0404',lis)
         json_str = json.dumps(lis)
         return HttpResponse(json_str)
 
