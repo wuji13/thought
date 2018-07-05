@@ -16,7 +16,7 @@ class Thought(models.Model):
     userId = models.ForeignKey(User)
     auther = models.CharField(max_length=64,blank=True,null=True)
     createTime = models.DateTimeField(auto_now_add=True)
-    content = models.CharField(max_length=8192)
+    content = models.TextField(max_length=8192)
     discussNum = models.IntegerField(default=0)
     supportNum = models.IntegerField(default=0)
     duration = models.FloatField()
@@ -29,7 +29,7 @@ class DiscussOne(models.Model):
     thoughtId = models.ForeignKey(Thought)
     userId = models.ForeignKey(User)
     auther = models.CharField(max_length=64, blank=True, null=True)
-    content = models.CharField(max_length=1024)
+    content = models.TextField(max_length=1024)
     createTime = models.DateTimeField(auto_now_add=True)
     discussNum = models.IntegerField(default=0)
     supportNum = models.IntegerField(default=0)
@@ -42,7 +42,7 @@ class DiscussTwo(models.Model):
     auther = models.CharField(max_length=64, blank=True, null=True)
     discussoneId = models.ForeignKey(DiscussOne)
     createTime = models.DateTimeField(auto_now_add=True)
-    content = models.CharField(max_length=1024)
+    content = models.TextField(max_length=1024)
 
     def __str__(self):  # __unicode__ on Python 2
         return self.content

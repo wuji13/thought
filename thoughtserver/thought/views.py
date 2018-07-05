@@ -227,17 +227,13 @@ def Support_thought(request):
             _ciphertext = int(request.POST.get('ciphertext'))
             _time = int(request.POST.get('time'))
             _key = request.POST.get('key')
-            print('1',_thoughtId)
             if Verify(_ciphertext, _time,_key):
-                print('12')
                 user = User.objects.get(wxId = _wxid)
-                print('13', user)
                 thought = Thought.objects.get(id = _thoughtId)
-                print('14',thought)
                 supp = SupportThought.objects.filter(userId=user).filter(thoughtId=thought)
-                print('2')
+
                 if supp:
-                    print('3')
+
                     supp.delete()
                     thought.supportNum=thought.supportNum - 1
                     thought.save()
@@ -245,7 +241,7 @@ def Support_thought(request):
                     json_str = json.dumps(lis)
                     return HttpResponse(json_str)
                 else:
-                    print('4')
+
                     suppThought = SupportThought(userId=user,thoughtId=thought)
                     suppThought.save()
                     thought.supportNum = thought.supportNum + 1
@@ -317,7 +313,7 @@ def Get_thought(request):
             _key = request.GET.get('key')
             if Verify(_ciphertext, _time,_key):
                 thought = Thought.objects.all().order_by('weight')
-                paginator = Paginator(thought, 4)
+                paginator = Paginator(thought, 20)
                 try:
                     contacts = paginator.page(_page)
                 except PageNotAnInteger:
@@ -615,7 +611,9 @@ def Get_user_img(request):
                     photoUrl = thought.userId.photoUrl
                     content = thought.content
                     auther = thought.auther
-                    data = {'photoUrl': photoUrl, 'content': content, 'auther': auther}
+                    da = thought.createTime
+                    date = str(da)
+                    data = {'photoUrl': photoUrl, 'content': content, 'auther': auther,'date':date}
                 elif _type=='discussone':
                     discussone = DiscussOne.objects.get(pk=_id)
                     photoUrl = discussone.userId.photoUrl
