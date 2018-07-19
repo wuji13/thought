@@ -16,6 +16,24 @@ Including another URLconf
 from django.conf.urls import url,include
 from django.contrib import admin
 
+from apscheduler.schedulers.background import BackgroundScheduler
+from thought.cron import setWeight
+
+
+#定时器
+scheduler = BackgroundScheduler()
+set_weight = setWeight
+
+scheduler.add_job(set_weight, 'cron', hour =4 )  # 凌晨4点执行
+
+try:
+    scheduler.start()  # 这里的调度任务是独立的一个线程
+except(KeyboardInterrupt, SystemExit):
+    scheduler.shutdown()
+
+
+
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^api/',include('thought.urls')),

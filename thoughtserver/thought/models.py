@@ -19,7 +19,8 @@ class Thought(models.Model):
     content = models.TextField(max_length=8192)
     discussNum = models.IntegerField(default=0)
     supportNum = models.IntegerField(default=0)
-    duration = models.FloatField()
+    duration = models.FloatField() #距离时长
+    selfW = models.FloatField(default=0) #自定义权重
     weight = models.FloatField(default=0)   #排名权重
 
     def __str__(self):  # __unicode__ on Python 2
@@ -68,6 +69,16 @@ class Developer(models.Model):
     name = models.CharField(max_length=40)
     key = models.CharField(max_length=64)
     secret = models.CharField(max_length=64)
+
+    def __str__(self):  # __unicode__ on Python 2
+        return self.name
+
+#权重表
+class WeightFactor(models.Model):
+    name = models.CharField(max_length=32)
+    time = models.FloatField(default=1)
+    sup = models.FloatField(default=1)
+    dis = models.FloatField(default=1)
 
     def __str__(self):  # __unicode__ on Python 2
         return self.name

@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.core.exceptions import ObjectDoesNotExist
 import requests
 import json
 import datetime,time
@@ -62,7 +63,6 @@ def Create_user(request):
     try:
         if request.method == 'POST':
             _wxid = request.POST.get('wxid')
-            print(_wxid)
             _ciphertext = int(request.POST.get('ciphertext'))
             _time = int(request.POST.get('time'))
             _key = request.POST.get('key')
@@ -71,16 +71,16 @@ def Create_user(request):
             _name = request.POST.get('name')
             print(_name)
             if Verify(_ciphertext, _time,_key):
-                u = User.objects.get(wxId=_wxid)
-                if u:
+                try:
+                    u = User.objects.get(wxId=_wxid)
                     u.name = _name
                     u.photoUrl = _photoUrl
                     u.save()
                     lis = {'data': '', 'errorCode': 102, 'flag': 'success', 'msg': 'user already exist '}
                     json_str = json.dumps(lis)
                     return HttpResponse(json_str)
-                else:
-                    user = User(wxId=_wxid,photoUrl=_photoUrl,name=_name)
+                except ObjectDoesNotExist:
+                    user = User(wxId=_wxid, photoUrl=_photoUrl, name=_name)
                     user.save()
                     lis = {'data': '', 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
                     print(type(lis))
