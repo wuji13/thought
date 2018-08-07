@@ -70,9 +70,7 @@ def Create_user(request):
             _time = int(request.POST.get('time'))
             _key = request.POST.get('key')
             _photoUrl = request.POST.get('photoUrl')
-            print(_photoUrl)
             _name = request.POST.get('name')
-            print(_name)
             if Verify(_ciphertext, _time,_key):
                 try:
                     u = User.objects.get(wxId=_wxid)
@@ -83,10 +81,10 @@ def Create_user(request):
                     json_str = json.dumps(lis)
                     return HttpResponse(json_str)
                 except ObjectDoesNotExist:
+                    print('meiren')
                     user = User(wxId=_wxid, photoUrl=_photoUrl, name=_name)
                     user.save()
                     lis = {'data': '', 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
-                    print(type(lis))
                     json_str = json.dumps(lis)
                     return HttpResponse(json_str)
             else:
@@ -315,7 +313,9 @@ def Get_thought(request):
             _time = int(request.GET.get('time'))
             _key = request.GET.get('key')
             if Verify(_ciphertext, _time,_key):
+                print(_page,'woca')
                 thought = Thought.objects.all().order_by('weight')
+                print(thought, 'wo32a')
                 paginator = Paginator(thought, 20)
                 try:
                     contacts = paginator.page(_page)

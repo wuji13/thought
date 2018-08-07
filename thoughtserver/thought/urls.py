@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from . import views
+from . import views,tests
 
 urlpatterns = [
     url(r'^getopenid', views.Get_openid, name='getopenid'),
@@ -17,4 +17,5 @@ urlpatterns = [
     url(r'^getmythought', views.Get_mythought, name='getmythought'),
     url(r'^getmydis', views.Get_mydis, name='getmydis'),
     url(r'^getmyreply', views.Get_myReply, name='getmyreply'),
+    url(r'^test', tests.Create_user_test, name='test'),
 ]

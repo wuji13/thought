@@ -7,8 +7,8 @@ class User(models.Model):
     wxId = models.CharField(max_length=128)
     name = models.CharField(max_length=64,blank=True,null=True)
     createTime = models.DateTimeField(auto_now_add=True)
-    photoUrl = models.CharField(max_length=256)
-    time = models.DateTimeField(auto_now=True)
+    photoUrl = models.CharField(max_length=256,blank=True,null=True)
+    time = models.DateTimeField(auto_now=True,blank=True,null=True)
 
     def __str__(self):  # __unicode__ on Python 2
         return self.wxId
