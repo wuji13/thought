@@ -8,7 +8,7 @@ import json
 import datetime,time
 from datetime import timedelta
 from django.http import HttpResponse
-from .models import Developer,User,Thought,DiscussTwo,SupportThought,SupportDisone,DiscussOne
+from .models import Developer,User,Thought,DiscussTwo,SupportThought,SupportDisone,DiscussOne,Show
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core import serializers
 from itertools import chain
@@ -673,6 +673,30 @@ def Or_support(request):
                 else:
                     lis = {'data': False, 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
 
+            else:
+                lis = {'data': '', 'errorCode': 101, 'flag': 'fail', 'msg': 'Verify is error'}
+
+        else:
+            lis = {'data': '', 'errorCode': 103, 'flag': 'fail', 'msg': 'request method error'}
+
+    except:
+        lis = {'data': '', 'errorCode': 104, 'flag': 'fail', 'msg': 'system is error'}
+    json_str = json.dumps(lis)
+    return HttpResponse(json_str)
+
+
+#获取是否显示
+def Get_show(request):
+    print('Get_show')
+    try:
+        if request.method == 'GET':
+            _ciphertext = int(request.GET.get('ciphertext'))
+            _time = int(request.GET.get('time'))
+            _key = request.GET.get('key')
+
+            if Verify(_ciphertext, _time, _key):
+                shows = Show.objects.get(name = 'list')
+                lis = {'data': shows.show, 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
             else:
                 lis = {'data': '', 'errorCode': 101, 'flag': 'fail', 'msg': 'Verify is error'}
 
