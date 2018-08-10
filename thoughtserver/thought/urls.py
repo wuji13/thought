@@ -18,5 +18,5 @@ urlpatterns = [
     url(r'^getmydis', views.Get_mydis, name='getmydis'),
     url(r'^getmyreply', views.Get_myReply, name='getmyreply'),
     url(r'^test', tests.Create_user_test, name='test'),
-    url(r'^getShow', tests.Get_show, name='getShow'),
+    url(r'^getShow', views.Get_show, name='getShow'),
 ]
