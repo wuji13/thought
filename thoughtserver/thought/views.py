@@ -39,11 +39,19 @@ def Get_openid(request):
             _ciphertext = int(request.GET.get('ciphertext'))
             _time = int(request.GET.get('time'))
             _key = request.GET.get('key')
-
+            _type = request.GET.get('appType')
             if Verify(_ciphertext, _time,_key):
-                r = requests.get(
-                    'https://api.weixin.qq.com/sns/jscode2session?appid=wx86e64720c0387b9f&secret=7965220b0c99aeb7132b293cc6122c4d&js_code=' + code + '&grant_type=authorization_code')
-                code = json.loads(r.text)
+
+                if _type=='suowu':
+                    r = requests.get(
+                        'https://api.weixin.qq.com/sns/jscode2session?appid=wx86e64720c0387b9f&secret=7965220b0c99aeb7132b293cc6122c4d&js_code=' + code + '&grant_type=authorization_code')
+                    code = json.loads(r.text)
+                elif _type =='xiang':
+                    r = requests.get(
+                        'https://api.weixin.qq.com/sns/jscode2session?appid=wx9b07ebd13495f392&secret=6ea8158c5a95641471bb513440976531&js_code=' + code + '&grant_type=authorization_code')
+                    code = json.loads(r.text)
+                else:
+                    code = 'no type'
                 lis = {'data': code, 'errorCode': 100, 'flag': 'success', 'msg': 'ok'}
                 json_str = json.dumps(lis)
                 return HttpResponse(json_str)
